@@ -109,9 +109,10 @@ INSERT INTO knowledge_base (tenant_id, title, content, file_url, category, sourc
 
 -- Insert Dummy Embeddings in Vector Index
 INSERT INTO vector_index (tenant_id, knowledge_id, embedding_vector, model_used) VALUES
-    (1, 1, '[0.1, 0.2, 0.3, 0.4, 0.5]', 'OpenAI'),
-    (1, 2, '[0.2, 0.3, 0.4, 0.5, 0.6]', 'OpenAI'),
-    (2, 3, '[0.4, 0.5, 0.6, 0.7, 0.8]', 'Mistral');
+    (1, 1, ARRAY[0.1, 0.2, 0.3, ... 0.0]::vector(1536), 'OpenAI'),
+    (1, 2, ARRAY[0.2, 0.3, 0.4, ... 0.0]::vector(1536), 'OpenAI'),
+    (2, 3, ARRAY[0.4, 0.5, 0.6, ... 0.0]::vector(1536), 'Mistral');
+
 
 -- Insert Dummy Chatbot Settings
 INSERT INTO chatbot_settings (tenant_id, setting_key, setting_value) VALUES

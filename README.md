@@ -38,3 +38,4 @@ This chatbot uses **PostgreSQL with pgvector**, **Retrieval-Augmented Generation
 │── README.md
 ```
 
+Thanks

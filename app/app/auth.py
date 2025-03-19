@@ -1,77 +1,73 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+# auth_service.py - Authentication Logic
+
 from datetime import datetime, timedelta
-from passlib.context import CryptContext
 from jose import JWTError, jwt
-import os
-from dotenv import load_dotenv
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+import secrets
 
-from app.database import get_db
-from app.models import User
-from app.schemas import UserCreate, UserLogin, Token
-from app.services.auth_service import create_access_token, verify_password, hash_password, get_current_user
+from app.models import User, APIKey
+from app.schemas import UserCreate
+from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
-# Load environment variables
-load_dotenv()
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
-
-auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-# Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
 
-@auth_router.post("/register", response_model=Token)
-def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    """ Register a new user """
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    hashed_password = hash_password(user_data.password)
-    new_user = User(username=user_data.username, email=user_data.email, hashed_password=hashed_password)
-    db.add(new_user)
+def verify_password(plain_password, hashed_password) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+def create_user(db: Session, user_data: UserCreate):
+    user = User(username=user_data.username, 
+                email=user_data.email, 
+                password_hash=hash_password(user_data.password),
+                role='user')
+    db.add(user)
     db.commit()
-    db.refresh(new_user)
+    db.refresh(user)
+    return user
 
-    # Generate JWT Token
-    access_token = create_access_token(data={"sub": new_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+def authenticate_user(db: Session, username: str, password: str):
+    user = db.query(User).filter(User.username == username).first()
+    if user and verify_password(password, user.password_hash):
+        return user
+    return None
 
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-@auth_router.post("/login", response_model=Token)
-def login(user_data: UserLogin, db: Session = Depends(get_db)):
-    """ Authenticate user and return JWT token """
-    user = db.query(User).filter(User.email == user_data.email).first()
-    if not user or not verify_password(user_data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+def get_current_user(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        return {"username": username}
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-
-@auth_router.post("/api-key")
-def generate_api_key(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """ Generate a unique API key for the user """
-    import secrets
+def generate_api_key(db: Session, user_id: int):
     api_key = secrets.token_hex(32)
-
-    current_user.api_key = api_key
+    new_key = APIKey(user_id=user_id, api_key=api_key)
+    db.add(new_key)
     db.commit()
-    db.refresh(current_user)
-
     return {"api_key": api_key}
 
+def list_api_keys(db: Session, user_id: int):
+    return db.query(APIKey).filter(APIKey.user_id == user_id).all()
 
-@auth_router.get("/me")
-def get_user_details(current_user: User = Depends(get_current_user)):
-    """ Get details of the currently logged-in user """
-    return {
-        "id": current_user.id,
-        "username": current_user.username,
-        "email": current_user.email,
-        "api_key": current_user.api_key
-    }
+def revoke_api_key(db: Session, key_id: int, user_id: int):
+    api_key = db.query(APIKey).filter(APIKey.id == key_id, APIKey.user_id == user_id).first()
+    if not api_key:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="API Key not found")
+    db.delete(api_key)
+    db.commit()
+    return {"message": "API key revoked"}

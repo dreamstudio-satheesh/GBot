@@ -1,5 +1,9 @@
 fastapi
 uvicorn
-psycopg2-binary
+pydantic
 SQLAlchemy
+psycopg2-binary
+passlib[bcrypt]
 python-dotenv
+pyjwt
+httpx

@@ -1,0 +1,5 @@
+# Ignore __pycache__ directories
+app/__pycache__/
+app/app/__pycache__/
+app/app/routes/__pycache__/
+app/app/services/__pycache__/

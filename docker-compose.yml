@@ -24,6 +24,19 @@ services:
       POSTGRES_DB: chatbot_db
     volumes:
       - chatbot_data:/var/lib/postgresql/data
+  
+  streamlit-ui:
+    build: ./streamlit_ui
+    container_name: chatbot-ui
+    env_file:
+      - .env
+    ports:
+      - "8501:8501"
+    depends_on:
+      - ai-chatbot
+    restart: always
+    volumes:
+      - ./streamlit_ui:/app  
 
 volumes:
   chatbot_data:

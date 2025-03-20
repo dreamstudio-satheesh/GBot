@@ -39,7 +39,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx_service
+    container_name: nginx
     restart: always
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro

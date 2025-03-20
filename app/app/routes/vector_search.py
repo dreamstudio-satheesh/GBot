@@ -2,49 +2,46 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import VectorIndex
+from app.services.vector_service import (
+    store_vector_embedding,
+    search_vector_entries,
+    get_all_vector_entries,
+    delete_vector_entry
+)
 from app.services.auth_service import get_current_user
 
 router = APIRouter()
 
 class VectorSearchQuery(BaseModel):
-    query_vector: list  # Embedding vector for search
+    query_text: str  # Text to search for
 
 class VectorStoreEntry(BaseModel):
     knowledge_id: int
-    embedding_vector: list
-    model_used: str
+    text: str  # Text to generate embedding from
 
 @router.post("/vector-search/query")
-def search_vector_entries(query: VectorSearchQuery, db: Session = Depends(get_db)):
-    """Perform a similarity search using vector embeddings."""
-    try:
-        # TODO: Implement similarity search logic (pgvector cosine similarity)
-        results = db.query(VectorIndex).all()
-        return results
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def search_vector(query: VectorSearchQuery, db: Session = Depends(get_db)):
+    """Perform a similarity search based on input text."""
+    results = search_vector_entries(db, query.query_text)
+    if not results:
+        raise HTTPException(status_code=404, detail="No similar entries found")
+    return results
 
 @router.post("/vector-search/store")
-def store_vector_entry(entry: VectorStoreEntry, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
-    """Store a new vector embedding."""
-    new_entry = VectorIndex(**entry.dict())
-    db.add(new_entry)
-    db.commit()
-    db.refresh(new_entry)
-    return {"message": "Vector entry stored successfully", "entry": new_entry}
+def store_vector(entry: VectorStoreEntry, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+    """Store a new vector embedding from text."""
+    new_vector = store_vector_embedding(db, entry.knowledge_id, entry.text)
+    return {"message": "Vector entry stored successfully", "entry": new_vector}
 
 @router.get("/vector-search/entries")
 def get_vector_entries(db: Session = Depends(get_db)):
     """Retrieve all stored vector embeddings."""
-    return db.query(VectorIndex).all()
+    return get_all_vector_entries(db)
 
 @router.delete("/vector-search/delete/{id}")
-def delete_vector_entry(id: int, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def delete_vector(id: int, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
     """Delete a vector entry by ID."""
-    db_entry = db.query(VectorIndex).filter(VectorIndex.id == id).first()
-    if not db_entry:
+    deleted_entry = delete_vector_entry(db, id)
+    if not deleted_entry:
         raise HTTPException(status_code=404, detail="Vector entry not found")
-    db.delete(db_entry)
-    db.commit()
     return {"message": "Vector entry deleted successfully"}

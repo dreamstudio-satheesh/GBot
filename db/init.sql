@@ -40,7 +40,7 @@ CREATE TABLE vector_index (
     id SERIAL PRIMARY KEY,
     tenant_id INT REFERENCES tenants(id) ON DELETE CASCADE,
     knowledge_id INT REFERENCES knowledge_base(id) ON DELETE CASCADE,
-    embedding_vector VECTOR(1536), -- OpenAI Embedding Size
+    embedding_vector VECTOR(384), -- OpenAI Embedding Size
     model_used VARCHAR(100),
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -109,9 +109,9 @@ INSERT INTO knowledge_base (tenant_id, title, content, file_url, category, sourc
 
 -- Insert Dummy Embeddings in Vector Index
 INSERT INTO vector_index (tenant_id, knowledge_id, embedding_vector, model_used) VALUES
-    (1, 1, ARRAY[0.1, 0.2, 0.3, ... 0.0]::vector(1536), 'OpenAI'),
-    (1, 2, ARRAY[0.2, 0.3, 0.4, ... 0.0]::vector(1536), 'OpenAI'),
-    (2, 3, ARRAY[0.4, 0.5, 0.6, ... 0.0]::vector(1536), 'Mistral');
+    (1, 1, ARRAY[0.1, 0.2, 0.3, ... 0.0]::vector(384), 'OpenAI'),
+    (1, 2, ARRAY[0.2, 0.3, 0.4, ... 0.0]::vector(384), 'OpenAI'),
+    (2, 3, ARRAY[0.4, 0.5, 0.6, ... 0.0]::vector(384), 'Mistral');
 
 
 -- Insert Dummy Chatbot Settings

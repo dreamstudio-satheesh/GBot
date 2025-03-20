@@ -35,9 +35,10 @@ class Tenant(Base):
     name = Column(String(255), unique=True, nullable=False)
     domain = Column(String(255), unique=True, nullable=False)
     created_at = Column(DateTime, default=func.now())
-
+    
 class KnowledgeBase(Base):
     __tablename__ = "knowledge_base"
+    __table_args__ = {"extend_existing": True}  # Prevents duplicate definition errors
 
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"))
@@ -49,6 +50,7 @@ class KnowledgeBase(Base):
 
 class VectorIndex(Base):
     __tablename__ = "vector_index"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, index=True)
     tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"))

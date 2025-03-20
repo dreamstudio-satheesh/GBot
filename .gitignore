@@ -3,3 +3,5 @@ app/__pycache__/
 app/app/__pycache__/
 app/app/routes/__pycache__/
 app/app/services/__pycache__/
+app/venv/
+app/.venv/

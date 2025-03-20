@@ -80,3 +80,20 @@ def log_chat_interaction(db: Session, user_id: int, message: str, response: str,
     )
     db.add(chat_log)
     db.commit()
+
+def get_chat_history(db: Session, user_id: int):
+    """Retrieves past chatbot interactions for a user."""
+    return db.query(ChatLogs).filter(ChatLogs.user_id == user_id).order_by(ChatLogs.created_at.desc()).all()
+
+def get_chatbot_settings(db: Session):
+    """Retrieves chatbot settings from the database."""
+    return db.query(ChatbotSettings).all()
+
+def update_chatbot_settings(db: Session, setting_key: str, setting_value: str):
+    """Updates chatbot settings dynamically."""
+    setting = db.query(ChatbotSettings).filter(ChatbotSettings.setting_key == setting_key).first()
+    if setting:
+        setting.setting_value = setting_value
+        db.commit()
+        return True
+    return False

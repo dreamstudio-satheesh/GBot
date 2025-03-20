@@ -36,7 +36,7 @@ services:
       - ai-chatbot
     restart: always
     volumes:
-      - ./streamlit_ui:/app  
+      - ./streamlit_ui:/app
 
 volumes:
   chatbot_data:

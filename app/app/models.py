@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, func, Text
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, func, Text, Float, ARRAY
 from sqlalchemy.orm import relationship
-from .database import Base
+from app.database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -27,3 +27,53 @@ class APIKey(Base):
     created_at = Column(DateTime, default=func.now())
 
     owner = relationship("User", back_populates="api_keys")
+
+class Tenant(Base):
+    __tablename__ = "tenants"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), unique=True, nullable=False)
+    domain = Column(String(255), unique=True, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+
+class KnowledgeBase(Base):
+    __tablename__ = "knowledge_base"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"))
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    category = Column(String)
+    source = Column(String, nullable=False)  # 'manual' or 'ai_generated'
+    created_at = Column(DateTime, default=func.now())
+
+class VectorIndex(Base):
+    __tablename__ = "vector_index"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"))
+    knowledge_id = Column(Integer, ForeignKey("knowledge_base.id", ondelete="CASCADE"))
+    embedding_vector = Column(ARRAY(Float))  # Vector embedding storage
+    model_used = Column(String, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+
+class ChatbotSettings(Base):
+    __tablename__ = "chatbot_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"))
+    setting_key = Column(String(255), unique=True, nullable=False)
+    setting_value = Column(Text, nullable=False)
+
+class ChatLogs(Base):
+    __tablename__ = "chat_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    message = Column(Text, nullable=False)
+    response = Column(Text, nullable=False)
+    source = Column(String(50), nullable=False)  # 'knowledge_base', 'vector_search', 'ai_model'
+    user_feedback = Column(String(10))  # 'positive', 'neutral', 'negative'
+    intent_detected = Column(String(255))
+    created_at = Column(DateTime, default=func.now())

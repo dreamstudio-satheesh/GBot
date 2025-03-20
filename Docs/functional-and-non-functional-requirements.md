@@ -15,7 +15,7 @@
    - Role-based access control for different user levels (Admin, Standard User, Guest).
    
 3. **Web-Based Admin Dashboard**  
-   - **Streamlit-based** interactive UI for managing chatbot settings.
+   - **Laravel-based** interactive UI for managing chatbot settings.
    - Dashboard for monitoring chat logs, analytics, and response accuracy.
    - User-friendly interface for configuring chatbot workflows and FAQs.
    

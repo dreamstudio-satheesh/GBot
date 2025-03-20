@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+echo "🚀 Starting Laravel entrypoint script..."
+
+# Ensure .env exists
+if [ ! -f .env ]; then
+    echo "⚠️ .env file missing! Copying from .env.example..."
+    cp .env.example .env
+fi
+
+# Inject environment variables into .env
+echo "🔧 Updating Laravel .env with database credentials..."
+sed -i "s|DB_HOST=.*|DB_HOST=${DB_HOST}|" .env
+sed -i "s|DB_PORT=.*|DB_PORT=${DB_PORT}|" .env
+sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|" .env
+sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|" .env
+sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" .env
+
+# Generate Laravel APP_KEY if missing
+if ! grep -q "APP_KEY=base64:" .env; then
+    echo "🔑 Generating Laravel app key..."
+    php artisan key:generate --no-interaction --force
+fi
+
+# Run migrations if in production
+if [ "$APP_ENV" = "production" ]; then
+    echo "🗄️ Running database migrations..."
+    php artisan migrate --force
+fi
+
+echo "✅ Laravel setup complete. Starting PHP-FPM..."
+exec "$@"

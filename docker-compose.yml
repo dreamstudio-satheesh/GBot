@@ -1,7 +1,7 @@
 services:
   api:
     build: .
-    container_name: fastapi_chatbot
+    container_name: fastapi
     ports:
       - "8000:8000"
     volumes:
@@ -14,7 +14,7 @@ services:
   db:
     build:
       context: ./db
-    container_name: chatbot_db
+    container_name: botdb
     restart: always
     ports:
       - "5432:5432"
@@ -24,19 +24,33 @@ services:
       POSTGRES_DB: chatbot_db
     volumes:
       - chatbot_data:/var/lib/postgresql/data
-  
-  streamlit-ui:
-    build: ./streamlit_ui
-    container_name: chatbot-ui
+
+  webapp:
+    build: ./webapp
+    container_name: web_app
+    restart: always
     env_file:
       - .env
+    volumes:
+      - ./webapp:/var/www/html
+    command: ["php-fpm"]
     ports:
-      - "8501:8501"
-    depends_on:
-      - api
+      - "9000:9000"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_service
     restart: always
     volumes:
-      - ./streamlit_ui:/app
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./laravel:/var/www/html
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api
+      - webapp
+
 
 volumes:
   chatbot_data:

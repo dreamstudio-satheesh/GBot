@@ -16,7 +16,7 @@ The SaaS-based AI chatbot system is designed to automate customer interactions f
 - **Retrieval-Augmented Generation (RAG) Engine** for dynamic knowledge retrieval
 
 ### **2.2 Frontend (Admin Dashboard & Chatbot Widget)**
-- **Admin Dashboard (Streamlit)** for chatbot management, logs, and analytics
+- **Admin Dashboard (Laravel)** for chatbot management, logs, and analytics
 - **Embeddable Chatbot Widget (JavaScript SDK)** for website integration
 - **Real-time WebSocket Communication** for interactive chat sessions
 
@@ -40,7 +40,7 @@ The SaaS-based AI chatbot system is designed to automate customer interactions f
 8. The user interaction is logged for future analysis and model improvements.
 
 ### **3.2 Admin Dashboard Interaction Workflow**
-1. Admin logs into the **Streamlit dashboard** (Username/Password authentication).
+1. Admin logs into the **Laravel dashboard** (Username/Password authentication).
 2. Admin manages chatbot settings, responses, and API keys.
 3. Admin reviews past chat logs and chatbot performance analytics.
 4. Admin updates the knowledge base (FAQs, custom responses).

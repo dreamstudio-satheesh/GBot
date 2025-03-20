@@ -18,7 +18,7 @@ A **SaaS-based AI Chatbot** designed for **online business websites and small e-
 
 ### **2.2 Frontend (Dashboard & Widget)**
 
-- **Admin Dashboard**: Streamlit
+- **Admin Dashboard**: Laravel
 - **Chatbot Widget**: JavaScript SDK (Embeddable)
 - **Multi-Channel Support**: Web-based chatbot (other channels deferred for future iterations)
 
@@ -56,7 +56,7 @@ A **SaaS-based AI Chatbot** designed for **online business websites and small e-
 
 ### **3.3 Phase 3: Frontend Development (DAY 7-10)**
 
-- Build **Streamlit-based admin dashboard**
+- Build **Laravel-based admin dashboard**
 - Develop **embeddable chatbot widget** (JavaScript SDK)
 - Implement **basic real-time chat UI with WebSockets**
 

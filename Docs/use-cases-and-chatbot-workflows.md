@@ -50,7 +50,7 @@
 
 ### **2.5 User Authentication & API Access**
 - Users access chatbot API via key-based authentication.
-- Admins log in to the Streamlit dashboard with username/password.
+- Admins log in to the Laravel dashboard with username/password.
 - Role-based access ensures security.
 
 ---
@@ -77,7 +77,7 @@
 4. If invalid, API returns an authentication error.
 
 ### **3.4 Admin Dashboard Login Workflow**
-1. Admin enters username and password in Streamlit dashboard.
+1. Admin enters username and password in Laravel dashboard.
 2. System validates credentials against the Users table.
 3. If valid, admin gains access.
 4. If invalid, system denies login and logs the attempt.

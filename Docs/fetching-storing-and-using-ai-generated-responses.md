@@ -28,7 +28,7 @@
   - **Confidence Score** (if applicable)
 
 ### **Manual Review & Knowledge Base Update**
-- SaaS Users can **review past chat history** via the Streamlit dashboard.
+- SaaS Users can **review past chat history** via the Laravel  dashboard.
 - If an AI-generated response is useful, it can be **stored in the knowledge base** for future retrieval.
 - This ensures that frequently asked questions get stored responses instead of making repeated AI calls.
 

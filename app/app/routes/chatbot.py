@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.chatbot_service import handle_chat_query, get_chat_history, get_chatbot_settings, update_chatbot_settings
-from app.services.auth_service import get_current_user
 
 router = APIRouter()
 
@@ -23,7 +22,7 @@ def chatbot_query(query: ChatQuery, db: Session = Depends(get_db)):
     return {"response": response}
 
 @router.get("/chatbot/history")
-def chatbot_history(db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def chatbot_history(db: Session = Depends(get_db)):
     """Retrieve past chatbot interactions."""
     history = get_chat_history(db, user["id"])
     return history
@@ -34,7 +33,7 @@ def chatbot_settings(db: Session = Depends(get_db)):
     return get_chatbot_settings(db)
 
 @router.put("/chatbot/settings/update")
-def update_settings(update_data: ChatbotSettingsUpdate, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def update_settings(update_data: ChatbotSettingsUpdate, db: Session = Depends(get_db)):
     """Update chatbot settings."""
     success = update_chatbot_settings(db, update_data.setting_key, update_data.setting_value)
     if not success:

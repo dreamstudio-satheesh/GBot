@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import KnowledgeBase
-from app.services.auth_service import get_current_user
 
 router = APIRouter()
 
@@ -20,7 +19,7 @@ def get_knowledge_entries(db: Session = Depends(get_db)):
     return entries
 
 @router.post("/knowledge-base/add")
-def add_knowledge_entry(entry: KnowledgeBaseEntry, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def add_knowledge_entry(entry: KnowledgeBaseEntry, db: Session = Depends(get_db)):
     """Add a new knowledge base entry."""
     new_entry = KnowledgeBase(**entry.dict())
     db.add(new_entry)
@@ -29,7 +28,7 @@ def add_knowledge_entry(entry: KnowledgeBaseEntry, db: Session = Depends(get_db)
     return {"message": "Entry added successfully", "entry": new_entry}
 
 @router.put("/knowledge-base/update/{id}")
-def update_knowledge_entry(id: int, entry: KnowledgeBaseEntry, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def update_knowledge_entry(id: int, entry: KnowledgeBaseEntry, db: Session = Depends(get_db)):
     """Update an existing knowledge base entry."""
     db_entry = db.query(KnowledgeBase).filter(KnowledgeBase.id == id).first()
     if not db_entry:
@@ -40,7 +39,7 @@ def update_knowledge_entry(id: int, entry: KnowledgeBaseEntry, db: Session = Dep
     return {"message": "Entry updated successfully"}
 
 @router.delete("/knowledge-base/delete/{id}")
-def delete_knowledge_entry(id: int, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def delete_knowledge_entry(id: int, db: Session = Depends(get_db)):
     """Delete a knowledge base entry."""
     db_entry = db.query(KnowledgeBase).filter(KnowledgeBase.id == id).first()
     if not db_entry:

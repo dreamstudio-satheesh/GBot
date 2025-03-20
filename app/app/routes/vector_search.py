@@ -8,7 +8,6 @@ from app.services.vector_service import (
     get_all_vector_entries,
     delete_vector_entry
 )
-from app.services.auth_service import get_current_user
 
 router = APIRouter()
 
@@ -28,7 +27,7 @@ def search_vector(query: VectorSearchQuery, db: Session = Depends(get_db)):
     return results
 
 @router.post("/vector-search/store")
-def store_vector(entry: VectorStoreEntry, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def store_vector(entry: VectorStoreEntry, db: Session = Depends(get_db)):
     """Store a new vector embedding from text."""
     new_vector = store_vector_embedding(db, entry.knowledge_id, entry.text)
     return {"message": "Vector entry stored successfully", "entry": new_vector}
@@ -39,7 +38,7 @@ def get_vector_entries(db: Session = Depends(get_db)):
     return get_all_vector_entries(db)
 
 @router.delete("/vector-search/delete/{id}")
-def delete_vector(id: int, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+def delete_vector(id: int, db: Session = Depends(get_db)):
     """Delete a vector entry by ID."""
     deleted_entry = delete_vector_entry(db, id)
     if not deleted_entry:

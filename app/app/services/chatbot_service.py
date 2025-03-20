@@ -1,8 +1,13 @@
 from sqlalchemy.orm import Session
 from app.models import KnowledgeBase, ChatLogs, ChatbotSettings
 from app.services.vector_service import search_vector_entries
-from app.services.ai_service import generate_ai_response  # AI model integration
+import requests
+import os
 from datetime import datetime
+
+# Load OpenRouter API Key
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_API_URL = "https://openrouter.ai/api/generate"
 
 def handle_chat_query(db: Session, message: str):
     """Handles chatbot queries by searching knowledge base, vector search, and AI model fallback."""
@@ -22,10 +27,19 @@ def handle_chat_query(db: Session, message: str):
             log_chat_interaction(db, message, knowledge_entry.content, "vector_search")
             return knowledge_entry.content
     
-    # Step 3: If no match found, use AI Model as fallback
+    # Step 3: If no match found, use OpenRouter AI Model as fallback
     ai_response = generate_ai_response(message)
     log_chat_interaction(db, message, ai_response, "ai_model")
     return ai_response
+
+def generate_ai_response(message: str) -> str:
+    """Generates a chatbot response using OpenRouter API."""
+    headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
+    data = {"prompt": message, "max_tokens": 150}
+    response = requests.post(OPENROUTER_API_URL, json=data, headers=headers)
+    if response.status_code == 200:
+        return response.json().get("text", "I couldn't generate a response.")
+    return "AI service is currently unavailable."
 
 def log_chat_interaction(db: Session, message: str, response: str, source: str):
     """Logs chatbot interactions for future analysis."""

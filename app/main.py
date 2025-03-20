@@ -11,12 +11,12 @@ app = FastAPI()
 
 # Register API Routes
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
-# app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
+app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
 app.include_router(knowledge_router, prefix="/knowledge-base", tags=["Knowledge Base"])
 app.include_router(vector_router, prefix="/vector-search", tags=["Vector Search"])
-# app.include_router(logs_router, prefix="/logs", tags=["Logs"])
-# app.include_router(admin_router, prefix="/admin", tags=["Admin"])
-# app.include_router(monitoring_router, prefix="/system", tags=["System Monitoring"])
+app.include_router(logs_router, prefix="/logs", tags=["Logs"])
+app.include_router(admin_router, prefix="/admin", tags=["Admin"])
+app.include_router(monitoring_router, prefix="/system", tags=["System Monitoring"])
 
 @app.get("/")
 def root():
